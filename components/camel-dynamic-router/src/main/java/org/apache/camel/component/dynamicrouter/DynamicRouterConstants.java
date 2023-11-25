@@ -14,34 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.camel.component.dynamicrouter;
 
-import java.util.regex.Pattern;
+import org.apache.camel.Expression;
+import org.apache.camel.support.builder.ExpressionBuilder;
 
 /**
  * Contains constants that are used within this component.
  */
-public final class DynamicRouterConstants {
+public abstract class DynamicRouterConstants {
 
     /**
-     * The camel version where this router became dynamic.
+     * The camel version where the dynamic router eip component was first introduced.
      */
     public static final String FIRST_VERSION = "3.15.0";
 
     /**
      * The component name/scheme for the {@link DynamicRouterEndpoint}.
      */
-    public static final String COMPONENT_SCHEME = "dynamic-router";
-
-    /**
-     * The control channel, where routing participants subscribe and provide their routing rules and endpoint URIs.
-     */
-    public static final String CONTROL_CHANNEL_NAME = "control";
-
-    /**
-     * Convenient constant for the control channel URI.
-     */
-    public static final String CONTROL_CHANNEL_URI = COMPONENT_SCHEME + ":" + CONTROL_CHANNEL_NAME;
+    public static final String COMPONENT_SCHEME_ROUTING = "dynamic-router";
 
     /**
      * The title, for the auto-generated documentation.
@@ -61,56 +53,9 @@ public final class DynamicRouterConstants {
     /**
      * The syntax, for the auto-generated documentation.
      */
-    public static final String SYNTAX = COMPONENT_SCHEME + ":channel";
+    public static final String SYNTAX = COMPONENT_SCHEME_ROUTING + ":channel";
 
-    /**
-     * Name of the control action parameter.
-     */
-    public static final String CONTROL_ACTION_PARAM = "controlAction";
+    public static final String RECIPIENT_LIST_HEADER = "DynamicRouterRecipientList";
 
-    /**
-     * Name of the channel parameter.
-     */
-    public static final String SUBSCRIPTION_CHANNEL_PARAM = "subscribeChannel";
-
-    /**
-     * The alternate control-channel syntax.
-     */
-    public static final String CONTROL_SYNTAX
-            = SYNTAX + "/" + CONTROL_ACTION_PARAM + "/" + SUBSCRIPTION_CHANNEL_PARAM;
-
-    /**
-     * Subscribe control channel action.
-     */
-    public static final String CONTROL_ACTION_SUBSCRIBE = "subscribe";
-
-    /**
-     * Unsubscribe control channel action.
-     */
-    public static final String CONTROL_ACTION_UNSUBSCRIBE = "unsubscribe";
-
-    /**
-     * The name for the regex capture group that captures the channel name.
-     */
-    public static final String CHANNEL_GROUP = "channel";
-
-    /**
-     * The name for the regex capture group that captures the control channel action.
-     */
-    public static final String ACTION_GROUP = "action";
-
-    /**
-     * The name for the regex capture group that captures the channel name for the subscription.
-     */
-    public static final String SUBSCRIBE_GROUP = "subscribe";
-
-    /**
-     * Regular expression to parse URI path parameters.
-     */
-    public static final Pattern PATH_PARAMS_PATTERN = Pattern.compile(
-            String.format("(?<%s>[^/]+)(/(?<%s>[^/]+)/(?<%s>[^/]+))?", CHANNEL_GROUP, ACTION_GROUP, SUBSCRIBE_GROUP));
-
-    private DynamicRouterConstants() {
-
-    }
+    public static final Expression RECIPIENT_LIST_EXPRESSION = ExpressionBuilder.headerExpression(RECIPIENT_LIST_HEADER);
 }

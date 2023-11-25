@@ -16,38 +16,74 @@
  */
 package org.apache.camel.component.dynamicrouter;
 
-import org.apache.camel.component.dynamicrouter.support.DynamicRouterTestSupport;
-import org.junit.jupiter.api.Assertions;
+import org.apache.camel.AsyncCallback;
+import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-class DynamicRouterProducerTest extends DynamicRouterTestSupport {
+@ExtendWith(MockitoExtension.class)
+class DynamicRouterProducerTest {
+
+    @RegisterExtension
+    static CamelContextExtension contextExtension = new DefaultCamelContextExtension();
+
+    @Mock
+    DynamicRouterComponent component;
+
+    @Mock
+    DynamicRouterProducer producer;
+
+    @Mock
+    DynamicRouterEndpoint endpoint;
+
+    @Mock
+    DynamicRouterProcessor processor;
+
+    @Mock
+    DynamicRouterConfiguration configuration;
+
+    @Mock
+    Exchange exchange;
+
+    @Mock
+    AsyncCallback asyncCallback;
+
+    CamelContext context;
 
     @BeforeEach
-    void localSetup() throws Exception {
-        super.setup();
-        // Remove the interactions defined in the superclass because
-        // this test class needs custom behavior
-        Mockito.reset(component);
+    void localSetup() {
+        context = contextExtension.getContext();
+        when(endpoint.getConfiguration()).thenReturn(configuration);
         producer = new DynamicRouterProducer(endpoint);
     }
 
     @Test
     void testProcessSynchronous() {
-        when(endpoint.getConfiguration().isSynchronous()).thenReturn(true);
+        when(configuration.isSynchronous()).thenReturn(true);
+        when(configuration.getChannel()).thenReturn("testChannel");
         boolean result = producer.process(exchange, asyncCallback);
-        Assertions.assertTrue(result);
+        assertTrue(result);
     }
 
     @Test
     void testProcessAsynchronous() {
-        when(endpoint.getConfiguration().isSynchronous()).thenReturn(false);
+        when(configuration.isSynchronous()).thenReturn(false);
+        when(configuration.getChannel()).thenReturn("testChannel");
         when(component.getRoutingProcessor(anyString())).thenReturn(processor);
+        when(endpoint.getDynamicRouterComponent()).thenReturn(component);
         boolean result = producer.process(exchange, asyncCallback);
-        Assertions.assertFalse(result);
+        assertFalse(result);
     }
 }

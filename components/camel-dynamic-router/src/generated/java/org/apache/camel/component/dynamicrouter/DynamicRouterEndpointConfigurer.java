@@ -23,12 +23,8 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "aggregationstrategy":
         case "aggregationStrategy": target.getConfiguration().setAggregationStrategy(property(camelContext, java.lang.String.class, value)); return true;
-        case "destinationuri":
-        case "destinationUri": target.getConfiguration().setDestinationUri(property(camelContext, java.lang.String.class, value)); return true;
         case "executorservice":
         case "executorService": target.getConfiguration().setExecutorService(property(camelContext, java.lang.String.class, value)); return true;
-        case "expressionlanguage":
-        case "expressionLanguage": target.getConfiguration().setExpressionLanguage(property(camelContext, java.lang.String.class, value)); return true;
         case "ignoreinvalidendpoints":
         case "ignoreInvalidEndpoints": target.getConfiguration().setIgnoreInvalidEndpoints(property(camelContext, boolean.class, value)); return true;
         case "lazystartproducer":
@@ -39,10 +35,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "parallelAggregate": target.getConfiguration().setParallelAggregate(property(camelContext, boolean.class, value)); return true;
         case "parallelprocessing":
         case "parallelProcessing": target.getConfiguration().setParallelProcessing(property(camelContext, boolean.class, value)); return true;
-        case "predicate": target.getConfiguration().setPredicate(property(camelContext, java.lang.String.class, value)); return true;
-        case "predicatebean":
-        case "predicateBean": target.getConfiguration().setPredicateBean(property(camelContext, org.apache.camel.Predicate.class, value)); return true;
-        case "priority": target.getConfiguration().setPriority(property(camelContext, java.lang.Integer.class, value)); return true;
         case "recipientmode":
         case "recipientMode": target.getConfiguration().setRecipientMode(property(camelContext, java.lang.String.class, value)); return true;
         case "shareunitofwork":
@@ -50,8 +42,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "stoponexception":
         case "stopOnException": target.getConfiguration().setStopOnException(property(camelContext, boolean.class, value)); return true;
         case "streaming": target.getConfiguration().setStreaming(property(camelContext, boolean.class, value)); return true;
-        case "subscriptionid":
-        case "subscriptionId": target.getConfiguration().setSubscriptionId(property(camelContext, java.lang.String.class, value)); return true;
         case "synchronous": target.getConfiguration().setSynchronous(property(camelContext, boolean.class, value)); return true;
         case "timeout": target.getConfiguration().setTimeout(property(camelContext, long.class, value)); return true;
         case "warndroppedmessage":
@@ -65,12 +55,8 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "aggregationstrategy":
         case "aggregationStrategy": return java.lang.String.class;
-        case "destinationuri":
-        case "destinationUri": return java.lang.String.class;
         case "executorservice":
         case "executorService": return java.lang.String.class;
-        case "expressionlanguage":
-        case "expressionLanguage": return java.lang.String.class;
         case "ignoreinvalidendpoints":
         case "ignoreInvalidEndpoints": return boolean.class;
         case "lazystartproducer":
@@ -81,10 +67,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "parallelAggregate": return boolean.class;
         case "parallelprocessing":
         case "parallelProcessing": return boolean.class;
-        case "predicate": return java.lang.String.class;
-        case "predicatebean":
-        case "predicateBean": return org.apache.camel.Predicate.class;
-        case "priority": return java.lang.Integer.class;
         case "recipientmode":
         case "recipientMode": return java.lang.String.class;
         case "shareunitofwork":
@@ -92,8 +74,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "stoponexception":
         case "stopOnException": return boolean.class;
         case "streaming": return boolean.class;
-        case "subscriptionid":
-        case "subscriptionId": return java.lang.String.class;
         case "synchronous": return boolean.class;
         case "timeout": return long.class;
         case "warndroppedmessage":
@@ -108,12 +88,8 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         switch (ignoreCase ? name.toLowerCase() : name) {
         case "aggregationstrategy":
         case "aggregationStrategy": return target.getConfiguration().getAggregationStrategy();
-        case "destinationuri":
-        case "destinationUri": return target.getConfiguration().getDestinationUri();
         case "executorservice":
         case "executorService": return target.getConfiguration().getExecutorService();
-        case "expressionlanguage":
-        case "expressionLanguage": return target.getConfiguration().getExpressionLanguage();
         case "ignoreinvalidendpoints":
         case "ignoreInvalidEndpoints": return target.getConfiguration().isIgnoreInvalidEndpoints();
         case "lazystartproducer":
@@ -124,10 +100,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "parallelAggregate": return target.getConfiguration().isParallelAggregate();
         case "parallelprocessing":
         case "parallelProcessing": return target.getConfiguration().isParallelProcessing();
-        case "predicate": return target.getConfiguration().getPredicate();
-        case "predicatebean":
-        case "predicateBean": return target.getConfiguration().getPredicateBean();
-        case "priority": return target.getConfiguration().getPriority();
         case "recipientmode":
         case "recipientMode": return target.getConfiguration().getRecipientMode();
         case "shareunitofwork":
@@ -135,8 +107,6 @@ public class DynamicRouterEndpointConfigurer extends PropertyConfigurerSupport i
         case "stoponexception":
         case "stopOnException": return target.getConfiguration().isStopOnException();
         case "streaming": return target.getConfiguration().isStreaming();
-        case "subscriptionid":
-        case "subscriptionId": return target.getConfiguration().getSubscriptionId();
         case "synchronous": return target.getConfiguration().isSynchronous();
         case "timeout": return target.getConfiguration().getTimeout();
         case "warndroppedmessage":

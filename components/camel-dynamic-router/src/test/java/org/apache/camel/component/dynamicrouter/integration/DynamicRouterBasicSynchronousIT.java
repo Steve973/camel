@@ -16,22 +16,25 @@
  */
 package org.apache.camel.component.dynamicrouter.integration;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.dynamicrouter.DynamicRouterComponent;
-import org.apache.camel.component.dynamicrouter.DynamicRouterControlMessage;
-import org.apache.camel.component.dynamicrouter.DynamicRouterControlMessage.SubscribeMessageBuilder;
-import org.apache.camel.component.dynamicrouter.DynamicRouterControlMessage.UnsubscribeMessageBuilder;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlComponent;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlMessage;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlMessage.SubscribeMessageBuilder;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlMessage.UnsubscribeMessageBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.COMPONENT_SCHEME;
-import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.CONTROL_CHANNEL_URI;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.COMPONENT_SCHEME_ROUTING;
+import static org.apache.camel.component.dynamicrouter.control.DynamicRouterControlConstants.COMPONENT_SCHEME_CONTROL;
+import static org.apache.camel.component.dynamicrouter.control.DynamicRouterControlConstants.CONTROL_ACTION_SUBSCRIBE;
+import static org.apache.camel.component.dynamicrouter.control.DynamicRouterControlConstants.CONTROL_CHANNEL_URI;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -66,7 +69,7 @@ public class DynamicRouterBasicSynchronousIT extends CamelTestSupport {
                 .endpointUri(mock.getEndpointUri())
                 .predicate(spyPredicate)
                 .build();
-        template.sendBody(CONTROL_CHANNEL_URI, subscribeMsg);
+        template.sendBody(CONTROL_CHANNEL_URI + ":" + CONTROL_ACTION_SUBSCRIBE, subscribeMsg);
 
         // Trigger events to subscribers
         template.sendBody("direct:start", "testMessage");
@@ -95,7 +98,7 @@ public class DynamicRouterBasicSynchronousIT extends CamelTestSupport {
                 .endpointUri(mock.getEndpointUri())
                 .predicate(spyPredicate)
                 .build();
-        template.sendBody(CONTROL_CHANNEL_URI, subscribeMessage);
+        template.sendBody(CONTROL_CHANNEL_URI + ":" + CONTROL_ACTION_SUBSCRIBE, subscribeMessage);
 
         // Trigger events to subscribers
         template.sendBody("direct:start", "testMessage");
@@ -129,7 +132,8 @@ public class DynamicRouterBasicSynchronousIT extends CamelTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        context.addComponent(COMPONENT_SCHEME, new DynamicRouterComponent());
+        context.addComponent(COMPONENT_SCHEME_CONTROL, new DynamicRouterControlComponent());
+        context.addComponent(COMPONENT_SCHEME_ROUTING, new DynamicRouterComponent());
         return context;
     }
 

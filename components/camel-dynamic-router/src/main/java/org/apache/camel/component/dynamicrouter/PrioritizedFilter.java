@@ -31,8 +31,7 @@ import org.apache.camel.processor.FilterProcessor;
  * @param endpoint  the destination endpoint for matching exchanges
  */
 public record PrioritizedFilter(String id, int priority, Predicate predicate, String endpoint)
-        implements
-            Comparable<PrioritizedFilter> {
+        implements Comparable<PrioritizedFilter> {
 
     /**
      * A comparator to sort {@link PrioritizedFilter}s by their priority field.

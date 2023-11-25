@@ -21,27 +21,19 @@ public class DynamicRouterEndpointUriFactory extends org.apache.camel.support.co
     private static final Set<String> SECRET_PROPERTY_NAMES;
     private static final Set<String> MULTI_VALUE_PREFIXES;
     static {
-        Set<String> props = new HashSet<>(23);
+        Set<String> props = new HashSet<>(15);
         props.add("aggregationStrategy");
         props.add("channel");
-        props.add("controlAction");
-        props.add("destinationUri");
         props.add("executorService");
-        props.add("expressionLanguage");
         props.add("ignoreInvalidEndpoints");
         props.add("lazyStartProducer");
         props.add("onPrepare");
         props.add("parallelAggregate");
         props.add("parallelProcessing");
-        props.add("predicate");
-        props.add("predicateBean");
-        props.add("priority");
         props.add("recipientMode");
         props.add("shareUnitOfWork");
         props.add("stopOnException");
         props.add("streaming");
-        props.add("subscribeChannel");
-        props.add("subscriptionId");
         props.add("synchronous");
         props.add("timeout");
         props.add("warnDroppedMessage");
@@ -63,8 +55,6 @@ public class DynamicRouterEndpointUriFactory extends org.apache.camel.support.co
         Map<String, Object> copy = new HashMap<>(properties);
 
         uri = buildPathParameter(syntax, uri, "channel", null, true, copy);
-        uri = buildPathParameter(syntax, uri, "controlAction", null, false, copy);
-        uri = buildPathParameter(syntax, uri, "subscribeChannel", null, false, copy);
         uri = buildQueryParameters(uri, copy, encode);
         return uri;
     }

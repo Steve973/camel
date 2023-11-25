@@ -49,7 +49,8 @@ public class DynamicRouterProducer extends DefaultAsyncProducer {
         super(endpoint);
         this.endpoint = endpoint;
         this.configuration = endpoint.getConfiguration();
-        LOG.debug("Created producer for endpoint '{}', channel '{}'", endpoint.getEndpointUri(), configuration.getChannel());
+        LOG.debug("Created producer for endpoint '{}', channel '{}'",
+                endpoint.getEndpointUri(), configuration.getChannel());
     }
 
     /**
@@ -83,20 +84,9 @@ public class DynamicRouterProducer extends DefaultAsyncProducer {
      */
     @Override
     public boolean process(final Exchange exchange, final AsyncCallback callback) {
-        if (configuration.isSynchronous()) {
-            try {
-                process(exchange);
-            } catch (Exception e) {
-                exchange.setException(e);
-            } finally {
-                callback.done(true);
-            }
-            return true;
-        } else {
-            return getComponent()
-                    .getRoutingProcessor(configuration.getChannel())
-                    .process(exchange, callback);
-        }
+        return getComponent()
+                .getRoutingProcessor(configuration.getChannel())
+                .process(exchange, callback);
     }
 
     /**

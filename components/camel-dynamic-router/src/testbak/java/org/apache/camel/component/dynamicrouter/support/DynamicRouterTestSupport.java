@@ -23,12 +23,14 @@ import java.util.function.Supplier;
 
 import org.apache.camel.*;
 import org.apache.camel.component.dynamicrouter.*;
-import org.apache.camel.component.dynamicrouter.DynamicRouterControlChannelProcessor.DynamicRouterControlChannelProcessorFactory;
-import org.apache.camel.component.dynamicrouter.DynamicRouterControlProducer.DynamicRouterControlProducerFactory;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlProducer;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlProducer.DynamicRouterControlProducerFactory;
 import org.apache.camel.component.dynamicrouter.DynamicRouterEndpoint.DynamicRouterEndpointFactory;
 import org.apache.camel.component.dynamicrouter.DynamicRouterMulticastProcessor.DynamicRouterRecipientListProcessorFactory;
 import org.apache.camel.component.dynamicrouter.DynamicRouterProducer.DynamicRouterProducerFactory;
 import org.apache.camel.component.dynamicrouter.PrioritizedFilter.PrioritizedFilterFactory;
+import org.apache.camel.component.dynamicrouter.DynamicRouterConfiguration;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlMessage;
 import org.apache.camel.language.simple.SimpleLanguage;
 import org.apache.camel.spi.*;
 import org.apache.camel.support.builder.PredicateBuilder;
@@ -39,7 +41,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.COMPONENT_SCHEME;
+import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.COMPONENT_SCHEME_ROUTING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -50,10 +52,10 @@ import static org.mockito.Mockito.lenient;
  * make the tests cleaner and easier to follow.
  */
 @ExtendWith(MockitoExtension.class)
-public class DynamicRouterTestSupport extends CamelTestSupport {
+public abstract class DynamicRouterTestSupport extends CamelTestSupport {
 
     public static final String DYNAMIC_ROUTER_CHANNEL = "test";
-    public static final String BASE_URI = String.format("%s:%s", COMPONENT_SCHEME, DYNAMIC_ROUTER_CHANNEL);
+    public static final String BASE_URI = String.format("%s:%s", COMPONENT_SCHEME_ROUTING, DYNAMIC_ROUTER_CHANNEL);
     public static final String PROCESSOR_ID = "testProcessorId";
     public static final String TEST_ID = "testId";
     public static final int TEST_PRIORITY = 10;
@@ -105,9 +107,6 @@ public class DynamicRouterTestSupport extends CamelTestSupport {
     protected DynamicRouterMulticastProcessor processor;
 
     @Mock
-    protected DynamicRouterControlChannelProcessor controlChannelProcessor;
-
-    @Mock
     protected PrioritizedFilter prioritizedFilter;
 
     @Mock
@@ -142,10 +141,8 @@ public class DynamicRouterTestSupport extends CamelTestSupport {
     // mocking or entangling of external units
     protected DynamicRouterEndpointFactory endpointFactory;
     protected DynamicRouterRecipientListProcessorFactory processorFactory;
-    protected DynamicRouterControlChannelProcessorFactory controlChannelProcessorFactory;
     protected PrioritizedFilterFactory prioritizedFilterFactory;
     protected DynamicRouterProducerFactory producerFactory;
-    protected DynamicRouterControlProducerFactory controlProducerFactory;
     protected PrioritizedFilterFactory filterProcessorFactory;
 
     /**
@@ -240,14 +237,6 @@ public class DynamicRouterTestSupport extends CamelTestSupport {
             }
         };
 
-        controlChannelProcessorFactory
-                = new DynamicRouterControlChannelProcessorFactory() {
-                    @Override
-                    public DynamicRouterControlChannelProcessor getInstance(DynamicRouterComponent component) {
-                        return controlChannelProcessor;
-                    }
-                };
-
         prioritizedFilterFactory = new PrioritizedFilterFactory() {
             @Override
             public PrioritizedFilter getInstance(String id, int priority, Predicate predicate, String endpoint) {
@@ -259,13 +248,6 @@ public class DynamicRouterTestSupport extends CamelTestSupport {
             @Override
             public DynamicRouterProducer getInstance(DynamicRouterEndpoint endpoint) {
                 return producer;
-            }
-        };
-
-        controlProducerFactory = new DynamicRouterControlProducerFactory() {
-            @Override
-            public DynamicRouterControlProducer getInstance(DynamicRouterEndpoint endpoint) {
-                return controlProducer;
             }
         };
 

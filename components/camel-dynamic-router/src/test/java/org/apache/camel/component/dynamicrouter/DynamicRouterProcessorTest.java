@@ -17,28 +17,82 @@
 package org.apache.camel.component.dynamicrouter;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
+import org.apache.camel.AsyncCallback;
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.component.dynamicrouter.support.DynamicRouterTestSupport;
+import org.apache.camel.Predicate;
+import org.apache.camel.component.dynamicrouter.PrioritizedFilter.PrioritizedFilterFactory;
+import org.apache.camel.component.dynamicrouter.control.DynamicRouterControlMessage;
 import org.apache.camel.processor.aggregate.UseLatestAggregationStrategy;
-import org.junit.jupiter.api.Assertions;
+import org.apache.camel.spi.ProducerCache;
+import org.apache.camel.test.infra.core.CamelContextExtension;
+import org.apache.camel.test.infra.core.DefaultCamelContextExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.apache.camel.component.dynamicrouter.DynamicRouterConstants.MODE_ALL_MATCH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-class DynamicRouterProcessorTest extends DynamicRouterTestSupport {
+@ExtendWith(MockitoExtension.class)
+class DynamicRouterProcessorTest {
+
+    static final String PROCESSOR_ID = "testProcessorId";
+
+    static final String TEST_ID = "testId";
+
+    @RegisterExtension
+    static CamelContextExtension contextExtension = new DefaultCamelContextExtension();
+
+    @Mock
+    AsyncCallback asyncCallback;
+
+    CamelContext context;
+
+    DynamicRouterProcessor processor;
+
+    @Mock
+    PrioritizedFilter prioritizedFilter;
+
+    @Mock
+    ProducerCache producerCache;
+
+    @Mock
+    ExecutorService executorService;
+
+    @Mock
+    DynamicRouterControlMessage controlMessage;
+
+    @Mock
+    Predicate predicate;
+
+    @Mock
+    Exchange exchange;
+
+    PrioritizedFilterFactory prioritizedFilterFactory;
 
     @BeforeEach
     void localSetup() throws Exception {
-        super.setup();
-        processor = new DynamicRouterMulticastProcessor(
+        context = contextExtension.getContext();
+        prioritizedFilterFactory = new PrioritizedFilterFactory() {
+            @Override
+            public PrioritizedFilter getInstance(String id, int priority, Predicate predicate, String endpoint) {
+                return prioritizedFilter;
+            }
+        };
+        processor = new DynamicRouterProcessor(
                 "testProcessorId", context, null, MODE_ALL_MATCH, false,
-                () -> filterProcessorFactory, producerCache,
+                () -> prioritizedFilterFactory, producerCache,
                 new UseLatestAggregationStrategy(), false, executorService, false,
                 false, false, -1, exchange -> {
                 }, false, false);
@@ -47,42 +101,46 @@ class DynamicRouterProcessorTest extends DynamicRouterTestSupport {
 
     @Test
     void createFilter() {
-        when(controlMessage.priority()).thenReturn(1);
-        when(controlMessage.predicate()).thenReturn(e -> true);
+        Mockito.when(controlMessage.priority()).thenReturn(1);
+        Mockito.when(controlMessage.predicate()).thenReturn(e -> true);
         PrioritizedFilter result = processor.createFilter(controlMessage);
-        assertEquals(filterProcessorLowPriority, result);
+        assertEquals(prioritizedFilter, result);
     }
 
     @Test
     void addFilterAsControlMessage() {
+        Mockito.when(prioritizedFilter.id()).thenReturn(TEST_ID);
         processor.addFilter(controlMessage);
-        Assertions.assertNotNull(processor.getFilter(TEST_ID));
+        assertNotNull(processor.getFilter(TEST_ID));
     }
 
     @Test
     void addFilterAsFilterProcessor() {
-        processor.addFilter(filterProcessorLowPriority);
+        Mockito.when(prioritizedFilter.id()).thenReturn(TEST_ID);
+        processor.addFilter(prioritizedFilter);
         PrioritizedFilter result = processor.getFilter(TEST_ID);
-        assertEquals(filterProcessorLowPriority, result);
+        assertEquals(prioritizedFilter, result);
     }
 
     @Test
     void addMultipleFiltersWithSameId() {
-        processor.addFilter(filterProcessorLowPriority);
-        processor.addFilter(filterProcessorLowPriority);
-        processor.addFilter(filterProcessorLowPriority);
-        processor.addFilter(filterProcessorLowPriority);
-        when(predicate.matches(any(Exchange.class))).thenReturn(true);
+        Mockito.when(prioritizedFilter.id()).thenReturn(TEST_ID);
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        processor.addFilter(prioritizedFilter);
+        processor.addFilter(prioritizedFilter);
+        processor.addFilter(prioritizedFilter);
+        processor.addFilter(prioritizedFilter);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(true);
         List<PrioritizedFilter> matchingFilters = processor.matchFilters(exchange);
         assertEquals(1, matchingFilters.size());
     }
 
     @Test
     void testMultipleFilterOrderByPriorityNotIdKey() {
-        when(predicate.matches(any(Exchange.class))).thenReturn(true);
-        when(filterProcessorLowestPriority.id()).thenReturn("anIdThatComesLexicallyBeforeTestId");
-        when(filterProcessorLowestPriority.predicate()).thenReturn(predicate);
-        processor.addFilter(filterProcessorLowestPriority);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(true);
+        Mockito.when(prioritizedFilter.id()).thenReturn("anIdThatComesLexicallyBeforeTestId");
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        processor.addFilter(prioritizedFilter);
         addFilterAsFilterProcessor();
         List<PrioritizedFilter> matchingFilters = processor.matchFilters(exchange);
         assertEquals(2, matchingFilters.size());
@@ -95,13 +153,14 @@ class DynamicRouterProcessorTest extends DynamicRouterTestSupport {
         addFilterAsFilterProcessor();
         processor.removeFilter(TEST_ID);
         PrioritizedFilter result = processor.getFilter(TEST_ID);
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
     void matchFiltersMatches() {
         addFilterAsFilterProcessor();
-        when(predicate.matches(any(Exchange.class))).thenReturn(true);
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(true);
         PrioritizedFilter result = processor.matchFilters(exchange).get(0);
         assertEquals(TEST_ID, result.id());
     }
@@ -109,21 +168,24 @@ class DynamicRouterProcessorTest extends DynamicRouterTestSupport {
     @Test
     void matchFiltersDoesNotMatch() {
         addFilterAsFilterProcessor();
-        when(predicate.matches(any(Exchange.class))).thenReturn(false);
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(false);
         assertTrue(processor.matchFilters(exchange).isEmpty());
     }
 
     @Test
     void processMatching() {
         addFilterAsFilterProcessor();
-        when(predicate.matches(any(Exchange.class))).thenReturn(true);
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(true);
         assertTrue(processor.process(exchange, asyncCallback));
     }
 
     @Test
     void processNotMatching() {
         addFilterAsFilterProcessor();
-        when(predicate.matches(any(Exchange.class))).thenReturn(false);
+        Mockito.when(prioritizedFilter.predicate()).thenReturn(predicate);
+        Mockito.when(predicate.matches(any(Exchange.class))).thenReturn(false);
         assertTrue(processor.process(exchange, asyncCallback));
     }
 

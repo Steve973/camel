@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.component.dynamicrouter;
+package org.apache.camel.component.dynamicrouter.control;
 
 import java.io.Serializable;
 
@@ -95,7 +95,7 @@ public record DynamicRouterControlMessage(ControlMessageType messageType, String
                     endpoint == null || endpoint.isEmpty() ||
                     predicate == null) {
                 throw new IllegalArgumentException(
-                        "Unsubscribe messages must be created with an id, a channel, an endpoint URI, and a predicate");
+                        "Subscribe messages must be created with an id, a channel, an endpoint URI, and a predicate");
             }
             return new DynamicRouterControlMessage(ControlMessageType.SUBSCRIBE, id, channel, priority, endpoint, predicate);
         }

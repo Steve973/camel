@@ -24,6 +24,7 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd ">
 
     <bean id="dynamic-router" class="org.apache.camel.component.dynamicrouter.DynamicRouterComponent"/>
+    <bean id="dynamic-router-control" class="org.apache.camel.component.dynamicrouter.control.DynamicRouterControlComponent"/>
 
     <camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
         <route>
